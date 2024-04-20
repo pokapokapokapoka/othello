@@ -1,1 +1,94 @@
+class OthelloGame:
+    def __init__(self):
+        self.board = [[' ' for _ in range(8)] for _ in range(8)]
+        self.board[3][3] = '●'
+        self.board[3][4] = '○'
+        self.board[4][3] = '○'
+        self.board[4][4] = '●'
+        self.player_color = '●'
+        self.computer_color = '○'
+        self.current_player = self.player_color
+
+    def print_board(self):
+        print("  0 1 2 3 4 5 6 7")
+        for i, row in enumerate(self.board):
+            print(i, end=" ")
+            for cell in row:
+                print(cell, end=" ")
+            print()
+
+    def is_valid_move(self, row, col, color):
+        if self.board[row][col] != ' ':
+            return False
+        for dr, dc in [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (-1, -1), (-1, 1), (1, -1)]:
+            r, c = row + dr, col + dc
+            if 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] != color and self.board[r][c] != ' ':
+                while 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] != ' ':
+                    r += dr
+                    c += dc
+                    if 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] == color:
+                        return True
+        return False
+
+    def make_move(self, row, col, color):
+        self.board[row][col] = color
+        for dr, dc in [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (-1, -1), (-1, 1), (1, -1)]:
+            r, c = row + dr, col + dc
+            if 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] != color and self.board[r][c] != ' ':
+                while 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] != ' ':
+                    r += dr
+                    c += dc
+                    if 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] == color:
+                        r, c = row + dr, col + dc
+                        while self.board[r][c] != color:
+                            self.board[r][c] = color
+                            r += dr
+                            c += dc
+                        break
+
+    def switch_player(self):
+        self.current_player = self.computer_color if self.current_player == self.player_color else self.player_color
+
+    def is_game_over(self):
+        return not any(self.is_valid_move(r, c, self.current_player) for r in range(8) for c in range(8))
+
+    def get_winner(self):
+        player_count = sum(row.count(self.player_color) for row in self.board)
+        computer_count = sum(row.count(self.computer_color) for row in self.board)
+        if player_count > computer_count:
+            return "Player"
+        elif computer_count > player_count:
+            return "Computer"
+        else:
+            return "Draw"
+
+
+def main():
+    game = OthelloGame()
+    while not game.is_game_over():
+        game.print_board()
+        if game.current_player == game.player_color:
+            print("Player's turn")
+            move = input("Enter your move (row col): ").split()
+            row, col = map(int, move)
+            while not game.is_valid_move(row, col, game.player_color):
+                print("Invalid move. Try again.")
+                move = input("Enter your move (row col): ").split()
+                row, col = map(int, move)
+        else:
+            print("Computer's turn")
+            # ここにコンピュータの動作を追加します
+            # ランダムな手を選択するか、より高度なアルゴリズムを使用して手を選択します
+            # この例では、ランダムな手を選択します
+            valid_moves = [(r, c) for r in range(8) for c in range(8) if game.is_valid_move(r, c, game.computer_color)]
+            row, col = random.choice(valid_moves)
+        game.make_move(row, col, game.current_player)
+        game.switch_player()
+    game.print_board()
+    winner = game.get_winner()
+    print("Game over. Winner is:", winner)
+
+
+if __name__ == "__main__":
+    main()
 
